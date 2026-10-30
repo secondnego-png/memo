@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lumo 메모리 게임</title>
+  <style>
+    :root {
+      --accent: #5b5bf0;
+      --accent-dark: #4343d6;
+      --accent-soft: #eef0ff;
+      --text: #16161d;
+      --muted: #5f6070;
+      --bg: #ffffff;
+      --surface: #fafafc;
+      --border: #ececf2;
+      --match: #e9f8ef;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--surface);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      word-break: keep-all;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-align: center;
+    }
+    h1 span { color: var(--accent); }
+    .sub {
+      text-align: center;
+      color: var(--muted);
+      margin: 8px 0 32px;
+    }
+
+    /* 난이도 */
+    .levels {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .level {
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg);
+      color: var(--muted);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .level:hover { border-color: var(--accent); color: var(--accent); }
+    .level[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* 상태 바 */
+    .stats {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .stat-group { display: flex; gap: 24px; flex-wrap: wrap; }
+    .stat { display: flex; flex-direction: column; }
+    .stat small { font-size: 0.8rem; color: var(--muted); }
+    .stat strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--accent-dark); }
+    .btn:focus-visible, .level:focus-visible, .card:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    /* 카드 판 */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 4), 1fr);
+      gap: var(--gap, 12px);
+      margin: 0 auto;
+      max-width: var(--board-max, 520px);
+    }
+    .card {
+      position: relative;
+      aspect-ratio: 1;
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      perspective: 800px;
+      font-size: var(--emoji, 2.5rem);
+    }
+    .card-inner {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform 0.45s ease;
+    }
+    .card.flipped .card-inner,
+    .card.matched .card-inner { transform: rotateY(180deg); }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .back {
+      background: linear-gradient(135deg, var(--accent) 0%, #8a8af7 100%);
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.6em;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(91, 91, 240, 0.2);
+    }
+    .card:hover:not(.flipped):not(.matched) .back { filter: brightness(1.08); }
+    .front {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      transform: rotateY(180deg);
+    }
+    .card.matched { cursor: default; }
+    .card.matched .front {
+      background: var(--match);
+      border-color: #bfe8cf;
+      animation: pop 0.35s ease 0.35s;
+    }
+    @keyframes pop {
+      50% { transform: rotateY(180deg) scale(1.08); }
+    }
+
+    /* 난이도별 크기 */
+    .board.easy   { --cols: 4; --board-max: 520px; --emoji: 2.75rem; }
+    .board.normal { --cols: 4; --board-max: 520px; --emoji: 2.5rem; }
+    .board.hard   { --cols: 6; --board-max: 672px; --emoji: 2rem; --gap: 10px; }
+
+    /* 완료 오버레이 */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(22, 22, 29, 0.45);
+      backdrop-filter: blur(4px);
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      width: 100%;
+      max-width: 360px;
+      padding: 40px 32px;
+      text-align: center;
+      background: var(--bg);
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+    }
+    .modal .big { font-size: 3rem; margin-bottom: 12px; }
+    .modal h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+    .modal p { color: var(--muted); margin-bottom: 4px; }
+    .modal .record {
+      display: inline-block;
+      margin: 12px 0 4px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .modal .btn { margin-top: 24px; padding: 14px 28px; }
+
+    @media (max-width: 600px) {
+      .wrap { padding: 32px 16px 48px; }
+      .stats { padding: 14px 16px; }
+      .stat-group { gap: 16px; }
+      .level { padding: 8px 14px; font-size: 0.9rem; white-space: nowrap; }
+      .board.easy, .board.normal { --emoji: clamp(1.75rem, 9vw, 2.5rem); --gap: 10px; }
+      .board.hard { --emoji: clamp(1.1rem, 6vw, 1.75rem); --gap: 6px; }
+      .board.hard .face { border-radius: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1><span>Lumo</span> 메모리 게임</h1>
+    <p class="sub">카드를 뒤집어 같은 그림 두 장을 찾아보세요.</p>
+
+    <div class="levels" role="group" aria-label="난이도">
+      <button class="level" data-level="easy">쉬움 4×3</button>
+      <button class="level" data-level="normal">보통 4×4</button>
+      <button class="level" data-level="hard">어려움 6×6</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-group">
+        <div class="stat"><small>시도</small><strong id="moves">0</strong></div>
+        <div class="stat"><small>시간</small><strong id="time">00:00</strong></div>
+        <div class="stat"><small>맞춘 쌍</small><strong id="pairs">0 / 0</strong></div>
+        <div class="stat"><small>최고 기록</small><strong id="best">—</strong></div>
+      </div>
+      <button class="btn" id="restart">다시 시작</button>
+    </div>
+
+    <div class="board" id="board" aria-label="카드 판"></div>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="done-title">
+    <div class="modal">
+      <div class="big" aria-hidden="true">🎉</div>
+      <h2 id="done-title">모두 찾았어요!</h2>
+      <p id="done-summary"></p>
+      <div class="record" id="done-record" hidden>🏆 새로운 최고 기록</div>
+      <div><button class="btn" id="again">다시 하기</button></div>
+    </div>
+  </div>
+
+  <script>
+    const EMOJIS = ['🍎', '🐶', '🚀', '🌈', '🎸', '🍩', '🐱', '⚽', '🌻', '🦊',
+                    '🍉', '🎈', '🐼', '🌙', '🍓', '🐢', '🎲', '🦄', '🍀', '🐙'];
+
+    const LEVELS = {
+      easy:   { pairs: 6 },
+      normal: { pairs: 8 },
+      hard:   { pairs: 18 },
+    };
+
+    const FLIP_BACK_MS = 800;
+
+    const boardEl = document.getElementById('board');
+    const movesEl = document.getElementById('moves');
+    const timeEl = document.getElementById('time');
+    const pairsEl = document.getElementById('pairs');
+    const bestEl = document.getElementById('best');
+    const overlayEl = document.getElementById('overlay');
+    const summaryEl = document.getElementById('done-summary');
+    const recordEl = document.getElementById('done-record');
+
+    let level = 'normal';
+    let first = null;
+    let second = null;
+    let lock = false;
+    let moves = 0;
+    let matched = 0;
+    let timerId = null;
+    let startTime = 0;
+    let elapsed = 0;
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function formatTime(ms) {
+      const total = Math.floor(ms / 1000);
+      const m = String(Math.floor(total / 60)).padStart(2, '0');
+      const s = String(total % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    // 최고 기록 (저장소를 못 쓰는 환경이면 조용히 건너뜀)
+    function bestKey() { return `lumo-memory-best-${level}`; }
+
+    function loadBest() {
+      try {
+        const raw = localStorage.getItem(bestKey());
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function saveBest(record) {
+      try { localStorage.setItem(bestKey(), JSON.stringify(record)); } catch (e) {}
+    }
+
+    function isBetter(a, b) {
+      if (!b) return true;
+      return a.moves < b.moves || (a.moves === b.moves && a.time < b.time);
+    }
+
+    function renderBest() {
+      const best = loadBest();
+      bestEl.textContent = best ? `${best.moves}회 · ${formatTime(best.time)}` : '—';
+    }
+
+    // 타이머
+    function startTimer() {
+      startTime = Date.now();
+      timerId = setInterval(() => {
+        elapsed = Date.now() - startTime;
+        timeEl.textContent = formatTime(elapsed);
+      }, 250);
+    }
+
+    function stopTimer() {
+      clearInterval(timerId);
+      timerId = null;
+      if (startTime) elapsed = Date.now() - startTime;
+    }
+
+    function updateStats() {
+      movesEl.textContent = moves;
+      pairsEl.textContent = `${matched} / ${LEVELS[level].pairs}`;
+    }
+
+    // 새 게임
+    function newGame() {
+      stopTimer();
+      first = second = null;
+      lock = false;
+      moves = matched = 0;
+      startTime = elapsed = 0;
+      timeEl.textContent = '00:00';
+      overlayEl.classList.remove('show');
+
+      document.querySelectorAll('.level').forEach(btn => {
+        btn.setAttribute('aria-pressed', String(btn.dataset.level === level));
+      });
+
+      const picks = shuffle([...EMOJIS]).slice(0, LEVELS[level].pairs);
+      const deck = shuffle([...picks, ...picks]);
+
+      boardEl.className = `board ${level}`;
+      boardEl.innerHTML = '';
+      deck.forEach((emoji, i) => {
+        const card = document.createElement('button');
+        card.className = 'card';
+        card.dataset.emoji = emoji;
+        card.setAttribute('aria-label', `카드 ${i + 1}, 덮여 있음`);
+        card.innerHTML = `
+          <span class="card-inner">
+            <span class="face back" aria-hidden="true">?</span>
+            <span class="face front" aria-hidden="true">${emoji}</span>
+          </span>`;
+        card.addEventListener('click', () => flip(card, i));
+        boardEl.appendChild(card);
+      });
+
+      updateStats();
+      renderBest();
+    }
+
+    function flip(card, index) {
+      if (lock || card === first || card.classList.contains('matched')) return;
+      if (!timerId && matched === 0 && moves === 0 && !first) startTimer();
+
+      card.classList.add('flipped');
+      card.setAttribute('aria-label', `카드 ${index + 1}, ${card.dataset.emoji}`);
+
+      if (!first) { first = card; return; }
+
+      second = card;
+      moves++;
+
+      if (first.dataset.emoji === second.dataset.emoji) {
+        first.classList.add('matched');
+        second.classList.add('matched');
+        first.setAttribute('aria-disabled', 'true');
+        second.setAttribute('aria-disabled', 'true');
+        first = second = null;
+        matched++;
+        updateStats();
+        if (matched === LEVELS[level].pairs) finish();
+      } else {
+        lock = true;
+        updateStats();
+        const a = first, b = second;
+        setTimeout(() => {
+          [a, b].forEach(c => {
+            c.classList.remove('flipped');
+            c.setAttribute('aria-label', c.getAttribute('aria-label').replace(/, .+$/, ', 덮여 있음'));
+          });
+          first = second = null;
+          lock = false;
+        }, FLIP_BACK_MS);
+      }
+    }
+
+    function finish() {
+      stopTimer();
+      timeEl.textContent = formatTime(elapsed);
+      const record = { moves, time: elapsed };
+      const isNew = isBetter(record, loadBest());
+      if (isNew) saveBest(record);
+      renderBest();
+
+      summaryEl.textContent = `${moves}번 시도 · ${formatTime(elapsed)}`;
+      recordEl.hidden = !isNew;
+      setTimeout(() => {
+        overlayEl.classList.add('show');
+        document.getElementById('again').focus();
+      }, 600);
+    }
+
+    document.querySelectorAll('.level').forEach(btn => {
+      btn.addEventListener('click', () => { level = btn.dataset.level; newGame(); });
+    });
+    document.getElementById('restart').addEventListener('click', newGame);
+    document.getElementById('again').addEventListener('click', newGame);
+
+    newGame();
+  </script>
+</body>
+</html>

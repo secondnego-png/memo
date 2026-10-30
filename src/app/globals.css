@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/*
+  디자인 토큰 (CLAUDE.md "디자인 토큰"과 같은 값)
+  Figma 토큰 이름의 "/"를 "-"로 바꾼 이름을 CSS 변수로 쓴다.
+  예: text/primary → var(--text-primary), space/16 → var(--space-16)
+*/
+:root {
+  --text-primary: #191f28;
+  --text-secondary: #4e5968;
+  --text-muted: #8b95a1;
+  --text-on-primary: #ffffff;
+  --surface-page: #f2f4f6;
+  --surface-card: #ffffff;
+  --border-default: #e5e8eb;
+  --label-blue: #3182f6;
+  --label-blue-soft: #e8f3ff;
+  --label-green: #12a150;
+  --label-green-soft: #e3f8ec;
+  --label-orange: #f76808;
+  --label-orange-soft: #fff1e5;
+  --label-pink: #e5397a;
+  --label-pink-soft: #ffeaf1;
+
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-34: 34px;
+  --space-48: 48px;
+  --space-64: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #4d94ff;
+    --text-primary: #f1f3f5;
+    --text-secondary: #b3bac2;
+    --text-muted: #6e7783;
+    --text-on-primary: #ffffff;
+    --surface-page: #101014;
+    --surface-card: #1c1c22;
+    --border-default: #2a2a33;
+    --label-blue: #6aa6ff;
+    --label-blue-soft: #1d2a40;
+    --label-green: #3ccb7f;
+    --label-green-soft: #17302a;
+    --label-orange: #ff9446;
+    --label-orange-soft: #3a2817;
+    --label-pink: #ff6fa2;
+    --label-pink-soft: #3b1d2a;
+  }
+}
+
+/*
+  Tailwind 기본 색, 글자 크기, 모서리, 글꼴을 지우고 토큰만 남긴다.
+  토큰에 없는 값(bg-zinc-50, text-sm 등)은 클래스가 만들어지지 않는다.
+*/
+@theme {
+  --color-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --font-*: initial;
+
+  /* color/primary: 이름이 Tailwind 색 변수와 같아서 여기서 바로 정한다 (다크 값은 위 :root) */
+  --color-primary: #3182f6;
+
+  /* radius/* → rounded-sm, rounded-md, rounded-lg, rounded-xl, rounded-full */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* 텍스트 스타일 → text-heading-xl, text-body-md ... (크기, 행간, 자간, 굵기를 한 번에) */
+  --text-heading-xl: 28px;
+  --text-heading-xl--line-height: 38px;
+  --text-heading-xl--letter-spacing: -0.8px;
+  --text-heading-xl--font-weight: 700;
+
+  --text-heading-lg: 26px;
+  --text-heading-lg--line-height: 36px;
+  --text-heading-lg--letter-spacing: -0.8px;
+  --text-heading-lg--font-weight: 700;
+
+  --text-title-lg: 20px;
+  --text-title-lg--line-height: 28px;
+  --text-title-lg--letter-spacing: -0.4px;
+  --text-title-lg--font-weight: 700;
+
+  --text-title-md: 17px;
+  --text-title-md--line-height: 24px;
+  --text-title-md--letter-spacing: -0.3px;
+  --text-title-md--font-weight: 700;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 28px;
+  --text-body-md--letter-spacing: -0.2px;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--letter-spacing: -0.1px;
+  --text-body-sm--font-weight: 400;
+
+  --text-button-md: 17px;
+  --text-button-md--line-height: 24px;
+  --text-button-md--letter-spacing: -0.2px;
+  --text-button-md--font-weight: 700;
+
+  --text-label-md: 15px;
+  --text-label-md--line-height: 22px;
+  --text-label-md--letter-spacing: -0.2px;
+  --text-label-md--font-weight: 700;
+
+  --text-caption-md: 15px;
+  --text-caption-md--line-height: 22px;
+  --text-caption-md--letter-spacing: -0.2px;
+  --text-caption-md--font-weight: 500;
+
+  --text-caption-sm: 13px;
+  --text-caption-sm--line-height: 18px;
+  --text-caption-sm--letter-spacing: 0px;
+  --text-caption-sm--font-weight: 500;
+}
+
+/* :root 변수를 Tailwind 클래스 이름으로 연결한다 */
+@theme inline {
+  /* 색 → bg-surface-page, text-text-primary, border-border-default, bg-label-blue-soft ... */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-on-primary: var(--text-on-primary);
+  --color-surface-page: var(--surface-page);
+  --color-surface-card: var(--surface-card);
+  --color-border-default: var(--border-default);
+  --color-label-blue: var(--label-blue);
+  --color-label-blue-soft: var(--label-blue-soft);
+  --color-label-green: var(--label-green);
+  --color-label-green-soft: var(--label-green-soft);
+  --color-label-orange: var(--label-orange);
+  --color-label-orange-soft: var(--label-orange-soft);
+  --color-label-pink: var(--label-pink);
+  --color-label-pink-soft: var(--label-pink-soft);
+
+  /* 간격 → p-space-16, gap-space-8, px-space-20 ... */
+  --spacing-space-4: var(--space-4);
+  --spacing-space-8: var(--space-8);
+  --spacing-space-12: var(--space-12);
+  --spacing-space-16: var(--space-16);
+  --spacing-space-20: var(--space-20);
+  --spacing-space-24: var(--space-24);
+  --spacing-space-34: var(--space-34);
+  --spacing-space-48: var(--space-48);
+  --spacing-space-64: var(--space-64);
+
+  /* 글꼴: layout.tsx에서 불러온 Noto Sans KR */
+  --font-sans: var(--font-noto-sans-kr), sans-serif;
+}
+
+body {
+  background: var(--surface-page);
+  color: var(--text-primary);
+}

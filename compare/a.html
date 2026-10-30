@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>메모 홈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Figma 변수 */
+  :root {
+    --color-primary: #3182f6;
+    --surface-page: #f2f4f6;
+    --surface-card: #ffffff;
+    --text-primary: #191f28;
+    --text-secondary: #4e5968;
+    --text-muted: #8b95a1;
+    --text-on-primary: #ffffff;
+    --label-blue-soft: #e8f3ff;
+    --label-green-soft: #e3f8ec;
+    --label-orange-soft: #fff1e5;
+    --label-pink-soft: #ffeaf1;
+    --space-4: 4px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-34: 34px;
+    --space-64: 64px;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-xl: 24px;
+    --radius-full: 999px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--surface-page); }
+  body {
+    font-family: "Noto Sans KR", sans-serif;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+  }
+  button { font: inherit; border: 0; background: none; cursor: pointer; color: inherit; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; }
+
+  /* Figma 텍스트 스타일 */
+  .t-heading-xl { font-size: 28px; font-weight: 700; line-height: 38px; letter-spacing: -0.8px; }
+  .t-title-md   { font-size: 17px; font-weight: 700; line-height: 24px; letter-spacing: -0.3px; }
+  .t-button-md  { font-size: 17px; font-weight: 700; line-height: 24px; letter-spacing: -0.2px; }
+  .t-label-md   { font-size: 15px; font-weight: 700; line-height: 22px; letter-spacing: -0.2px; }
+  .t-caption-md { font-size: 15px; font-weight: 500; line-height: 22px; letter-spacing: -0.2px; }
+  .t-body-sm    { font-size: 14px; font-weight: 400; line-height: 20px; letter-spacing: -0.1px; }
+  .t-caption-sm { font-size: 13px; font-weight: 500; line-height: 18px; letter-spacing: 0; }
+
+  /* 화면 (완성 예시/Home) */
+  .screen {
+    width: 100%;
+    max-width: 390px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    padding: var(--space-64) var(--space-16) calc(var(--space-34) + env(safe-area-inset-bottom, 0px));
+    background: var(--surface-page);
+  }
+  .main { flex: 1 0 auto; display: flex; flex-direction: column; gap: var(--space-16); }
+
+  /* Header */
+  .header { display: flex; flex-direction: column; gap: var(--space-8); padding: 0 var(--space-8); }
+  .header__date { color: var(--text-muted); }
+  .header__title { color: var(--text-primary); }
+  .header__count { color: var(--color-primary); }
+
+  /* Filter / Chip */
+  .filter { display: flex; gap: var(--space-8); padding: 0 var(--space-4); }
+  .chip {
+    flex-shrink: 0;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-16);
+    border-radius: var(--radius-full);
+    background: var(--surface-card);
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .chip[aria-pressed="true"] { background: var(--color-primary); color: var(--text-on-primary); }
+
+  /* Card */
+  .card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-8) 0;
+    border-radius: var(--radius-xl);
+    background: var(--surface-card);
+  }
+
+  /* Card/Header */
+  .card-header {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-12) var(--space-16) var(--space-4) var(--space-20);
+  }
+  .card-header__title { flex: 1 1 0; min-width: 0; color: var(--text-primary); }
+  .card-header__action { display: flex; align-items: center; gap: var(--space-4); color: var(--text-muted); white-space: nowrap; }
+
+  /* Memo/Item */
+  .memo {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+    padding: var(--space-12) var(--space-20);
+  }
+  .memo__tile {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+  }
+  .memo__tile--blue   { background: var(--label-blue-soft); }
+  .memo__tile--green  { background: var(--label-green-soft); }
+  .memo__tile--orange { background: var(--label-orange-soft); }
+  .memo__tile--pink   { background: var(--label-pink-soft); }
+  .memo__content { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+  .memo__title { color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .memo__preview { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .memo__date { flex-shrink: 0; color: var(--text-muted); white-space: nowrap; }
+
+  /* Button/Primary: 화면 아래에 붙는다 */
+  .btn-primary {
+    position: sticky;
+    bottom: calc(var(--space-34) + env(safe-area-inset-bottom, 0px));
+    flex-shrink: 0;
+    width: 100%;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-8);
+    padding: 0 var(--space-24);
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--text-on-primary);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <main class="main">
+      <header class="header">
+        <p class="header__date t-caption-md">10월 30일 금요일</p>
+        <h1 class="header__title t-heading-xl">오늘까지 메모를<br><span class="header__count">128개</span> 남겼어요</h1>
+      </header>
+
+      <nav class="filter" aria-label="분류">
+        <button class="chip t-label-md" type="button" aria-pressed="true">전체</button>
+        <button class="chip t-label-md" type="button" aria-pressed="false">업무</button>
+        <button class="chip t-label-md" type="button" aria-pressed="false">개인</button>
+        <button class="chip t-label-md" type="button" aria-pressed="false">아이디어</button>
+      </nav>
+
+      <section class="card" aria-labelledby="pinned-title">
+        <div class="card-header">
+          <img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL1BpbiI+CjxwYXRoIGlkPSJTaGFwZSIgZD0iTTYgMi4zMzMzM0gxMEw5LjQgNS44TDExLjMzMzMgOEg0LjY2NjY3TDYuNiA1LjhMNiAyLjMzMzMzWiIgc3Ryb2tlLXdpZHRoPSIxLjMzMzMzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0iIzMxODJGNiIvPgo8cGF0aCBpZD0iU2hhcGVfMiIgZD0iTTggOFYxMy4zMzMzIiBzdHJva2Utd2lkdGg9IjEuMzMzMzMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSIjMzE4MkY2Ii8+CjwvZz4KPC9zdmc+Cg==" width="16" height="16" alt="">
+          <h2 id="pinned-title" class="card-header__title t-label-md">고정한 메모</h2>
+        </div>
+        <a class="memo" href="#">
+          <span class="memo__tile memo__tile--blue"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiB2aWV3Qm94PSIwIDAgMjIgMjIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL05vdGUiPgo8cGF0aCBpZD0iU2hhcGUiIGQ9Ik02LjQxNjY3IDMuNjY2NjdIMTIuODMzM0wxNi41IDcuMzMzMzNWMTguMzMzM0g2LjQxNjY3VjMuNjY2NjdaIiBzdHJva2Utd2lkdGg9IjEuODMzMzMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSIjMzE4MkY2Ii8+CjxwYXRoIGlkPSJTaGFwZV8yIiBkPSJNMTIuODMzMyAzLjY2NjY3VjcuMzMzMzNIMTYuNU05LjE2NjY3IDExSDEzLjc1TTkuMTY2NjcgMTQuNjY2N0gxMy43NSIgc3Ryb2tlLXdpZHRoPSIxLjgzMzMzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0iIzMxODJGNiIvPgo8L2c+Cjwvc3ZnPgo=" width="22" height="22" alt=""></span>
+          <span class="memo__content">
+            <span class="memo__title t-title-md">디자인 리뷰 회의록</span>
+            <span class="memo__preview t-body-sm">검수 기준과 다음 할 일 정리</span>
+          </span>
+          <span class="memo__date t-caption-sm">오늘</span>
+        </a>
+        <a class="memo" href="#">
+          <span class="memo__tile memo__tile--green"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiB2aWV3Qm94PSIwIDAgMjIgMjIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL05vdGUiPgo8cGF0aCBpZD0iU2hhcGUiIGQ9Ik02LjQxNjY3IDMuNjY2NjdIMTIuODMzM0wxNi41IDcuMzMzMzNWMTguMzMzM0g2LjQxNjY3VjMuNjY2NjdaIiBzdHJva2Utd2lkdGg9IjEuODMzMzMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSIjMTJBMTUwIi8+CjxwYXRoIGlkPSJTaGFwZV8yIiBkPSJNMTIuODMzMyAzLjY2NjY3VjcuMzMzMzNIMTYuNU05LjE2NjY3IDExSDEzLjc1TTkuMTY2NjcgMTQuNjY2N0gxMy43NSIgc3Ryb2tlLXdpZHRoPSIxLjgzMzMzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0iIzEyQTE1MCIvPgo8L2c+Cjwvc3ZnPgo=" width="22" height="22" alt=""></span>
+          <span class="memo__content">
+            <span class="memo__title t-title-md">주말 등산 준비</span>
+            <span class="memo__preview t-body-sm">물 두 병, 간식, 바람막이 챙기기</span>
+          </span>
+          <span class="memo__date t-caption-sm">어제</span>
+        </a>
+      </section>
+
+      <section class="card" aria-labelledby="recent-title">
+        <div class="card-header">
+          <h2 id="recent-title" class="card-header__title t-label-md">최근 메모</h2>
+          <a class="card-header__action t-caption-md" href="#">전체 보기<img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL0NoZXZyb25SaWdodCI+CjxwYXRoIGlkPSJTaGFwZSIgZD0iTTYgNEwxMCA4TDYgMTIiIHN0cm9rZS13aWR0aD0iMS4zMzMzMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9IiM4Qjk1QTEiLz4KPC9nPgo8L3N2Zz4K" width="16" height="16" alt=""></a>
+        </div>
+        <a class="memo" href="#">
+          <span class="memo__tile memo__tile--pink"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiB2aWV3Qm94PSIwIDAgMjIgMjIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL05vdGUiPgo8cGF0aCBpZD0iU2hhcGUiIGQ9Ik02LjQxNjY3IDMuNjY2NjdIMTIuODMzM0wxNi41IDcuMzMzMzNWMTguMzMzM0g2LjQxNjY3VjMuNjY2NjdaIiBzdHJva2Utd2lkdGg9IjEuODMzMzMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSIjRTUzOTdBIi8+CjxwYXRoIGlkPSJTaGFwZV8yIiBkPSJNMTIuODMzMyAzLjY2NjY3VjcuMzMzMzNIMTYuNU05LjE2NjY3IDExSDEzLjc1TTkuMTY2NjcgMTQuNjY2N0gxMy43NSIgc3Ryb2tlLXdpZHRoPSIxLjgzMzMzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0iI0U1Mzk3QSIvPgo8L2c+Cjwvc3ZnPgo=" width="22" height="22" alt=""></span>
+          <span class="memo__content">
+            <span class="memo__title t-title-md">장보기 목록</span>
+            <span class="memo__preview t-body-sm">우유, 계란, 사과, 커피 원두</span>
+          </span>
+          <span class="memo__date t-caption-sm">오늘</span>
+        </a>
+        <a class="memo" href="#">
+          <span class="memo__tile memo__tile--orange"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiB2aWV3Qm94PSIwIDAgMjIgMjIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL05vdGUiPgo8cGF0aCBpZD0iU2hhcGUiIGQ9Ik02LjQxNjY3IDMuNjY2NjdIMTIuODMzM0wxNi41IDcuMzMzMzNWMTguMzMzM0g2LjQxNjY3VjMuNjY2NjdaIiBzdHJva2Utd2lkdGg9IjEuODMzMzMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSIjRjc2ODA4Ii8+CjxwYXRoIGlkPSJTaGFwZV8yIiBkPSJNMTIuODMzMyAzLjY2NjY3VjcuMzMzMzNIMTYuNU05LjE2NjY3IDExSDEzLjc1TTkuMTY2NjcgMTQuNjY2N0gxMy43NSIgc3Ryb2tlLXdpZHRoPSIxLjgzMzMzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0iI0Y3NjgwOCIvPgo8L2c+Cjwvc3ZnPgo=" width="22" height="22" alt=""></span>
+          <span class="memo__content">
+            <span class="memo__title t-title-md">앱 아이콘 아이디어</span>
+            <span class="memo__preview t-body-sm">메모지 모서리가 접힌 모양</span>
+          </span>
+          <span class="memo__date t-caption-sm">오늘</span>
+        </a>
+        <a class="memo" href="#">
+          <span class="memo__tile memo__tile--green"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiB2aWV3Qm94PSIwIDAgMjIgMjIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL05vdGUiPgo8cGF0aCBpZD0iU2hhcGUiIGQ9Ik02LjQxNjY3IDMuNjY2NjdIMTIuODMzM0wxNi41IDcuMzMzMzNWMTguMzMzM0g2LjQxNjY3VjMuNjY2NjdaIiBzdHJva2Utd2lkdGg9IjEuODMzMzMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSIjMTJBMTUwIi8+CjxwYXRoIGlkPSJTaGFwZV8yIiBkPSJNMTIuODMzMyAzLjY2NjY3VjcuMzMzMzNIMTYuNU05LjE2NjY3IDExSDEzLjc1TTkuMTY2NjcgMTQuNjY2N0gxMy43NSIgc3Ryb2tlLXdpZHRoPSIxLjgzMzMzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0iIzEyQTE1MCIvPgo8L2c+Cjwvc3ZnPgo=" width="22" height="22" alt=""></span>
+          <span class="memo__content">
+            <span class="memo__title t-title-md">읽을 책</span>
+            <span class="memo__preview t-body-sm">디자인 시스템 책 두 권</span>
+          </span>
+          <span class="memo__date t-caption-sm">어제</span>
+        </a>
+      </section>
+    </main>
+
+    <button class="btn-primary t-button-md" type="button">
+      <img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiB2aWV3Qm94PSIwIDAgMjAgMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJJY29uL1BsdXMiPgo8cGF0aCBpZD0iU2hhcGUiIGQ9Ik0xMCA0LjE2NjY3VjEwTTEwIDEwVjE1LjgzMzNNMTAgMTBINC4xNjY2N00xMCAxMEgxNS44MzMzIiBzdHJva2Utd2lkdGg9IjEuNjY2NjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSJ3aGl0ZSIvPgo8L2c+Cjwvc3ZnPgo=" width="20" height="20" alt="">새 메모 쓰기
+    </button>
+  </div>
+
+  <script>
+    // 분류 칩: 하나만 고른 상태
+    document.querySelectorAll('.chip').forEach(function (chip, _, all) {
+      chip.addEventListener('click', function () {
+        all.forEach(function (c) { c.setAttribute('aria-pressed', String(c === chip)); });
+      });
+    });
+  </script>
+</body>
+</html>
