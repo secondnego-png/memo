@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 
@@ -12,6 +12,22 @@ const notoSansKR = Noto_Sans_KR({
 export const metadata: Metadata = {
   title: "메모",
   description: "메모 앱",
+  applicationName: "메모",
+  // 아이폰 홈 화면에 추가했을 때의 이름과 상태 표시줄. 아이콘은 app/apple-icon.png
+  appleWebApp: {
+    capable: true,
+    title: "메모",
+    statusBarStyle: "default",
+  },
+};
+
+// 앱처럼 열렸을 때 상태 표시줄 색. 화면 배경(surface/page)과 맞춘다.
+// meta 태그에는 CSS 변수를 쓸 수 없어 토큰 값을 직접 적는다.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F2F4F6" },
+    { media: "(prefers-color-scheme: dark)", color: "#101014" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

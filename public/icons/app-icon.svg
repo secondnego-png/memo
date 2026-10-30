@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 앱 아이콘 원본. 배경은 color/primary, 메모 모양은 text/on-primary.
+       가장자리까지 배경을 채우고 메모 모양은 가운데 안전 영역(80%) 안에 둔다 (maskable). -->
+  <rect width="512" height="512" fill="#3182F6"/>
+  <g transform="translate(256 256) scale(19) translate(-11.4583 -11)" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6.41667 3.66667H12.8333L16.5 7.33333V18.3333H6.41667V3.66667Z" fill="#FFFFFF" fill-opacity="0.18"/>
+    <path d="M12.8333 3.66667V7.33333H16.5M9.16667 11H13.75M9.16667 14.6667H13.75"/>
+  </g>
+</svg>
